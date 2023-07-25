@@ -48,7 +48,7 @@ export default {
         username: [
           { required: true, message: '请输入用户名', trigger: 'blur' },
           {
-            min: 3,
+            min: 2,
             max: 10,
             message: '长度在 3 到 10 个字符',
             trigger: 'blur'
@@ -57,7 +57,7 @@ export default {
         password: [
           { required: true, message: '请输入密码', trigger: 'blur' },
           {
-            min: 6,
+            min: 3,
             max: 15,
             message: '长度在 6 到 15 个字符',
             trigger: 'blur'
