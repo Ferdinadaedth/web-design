@@ -1,6 +1,7 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <template>
   <div class="login_container">
+  <h1 style="color: blue;">问答社区</h1>
     <div class="login_box">
       <div class="avatar_box">
         <img src="../assets/logo.png" alt="" />
