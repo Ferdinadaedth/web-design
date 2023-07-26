@@ -1,7 +1,8 @@
 import axios from 'axios'
 const request = axios.create({
-  baseURL: 'http://43.138.59.103:100',
-  //   baseURL: 'ten.ferdinandaedth.top:100',
+   baseURL: 'http://127.0.0.1:8088',
+  // baseURL: 'http://43.138.59.103:100',
+  //   baseURL: 'http://ten.ferdinandaedth.top:100',
   // `transformResponse` 在传递给 then/catch 前，允许修改响应数据
   transformResponse: [function (data) {
     // 对 data 进行任意转换处理
@@ -23,7 +24,11 @@ request.interceptors.request.use(function (config) {
 // 添加响应拦截器
 request.interceptors.response.use(function (response) {
   // 对响应数据做点什么
-  return response
+  const data = response.data
+  const responseData = JSON.parse(data)
+  return {
+    data: responseData
+  }
 }, function (error) {
   // 对响应错误做点什么
   return Promise.reject(error)

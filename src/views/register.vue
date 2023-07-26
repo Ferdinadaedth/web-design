@@ -27,8 +27,16 @@
             placeholder="请输入密码"
           ></el-input>
         </el-form-item>
+        <el-form-item prop="email">
+          <el-input
+            prefix-icon="iconfont icon-3702mima"
+            v-model="loginForm.email"
+            type="email"
+            placeholder="请输入邮箱"
+          ></el-input>
+        </el-form-item>
         <el-form-item class="btns">
-          <el-button type="primary" @click="login">登录</el-button>
+          <el-button type="primary" @click="login">注册</el-button>
           <el-button @click="loginFormReset">重置</el-button>
         </el-form-item>
       </el-form>
@@ -36,19 +44,20 @@
   </div>
 </template>
 <script>
-import { login } from '@/api/user'
+import { register } from '@/api/user'
 export default {
   data () {
     return {
       loginForm: {
         username: '',
-        password: ''
+        password: '',
+        email: ''
       },
       loginFormRules: {
         username: [
           { required: true, message: '请输入用户名', trigger: 'blur' },
           {
-            min: 2,
+            min: 3,
             max: 10,
             message: '长度在 3 到 10 个字符',
             trigger: 'blur'
@@ -57,7 +66,7 @@ export default {
         password: [
           { required: true, message: '请输入密码', trigger: 'blur' },
           {
-            min: 2,
+            min: 3,
             max: 15,
             message: '长度在 3 到 15 个字符',
             trigger: 'blur'
@@ -74,23 +83,22 @@ export default {
       this.$refs.loginFormRef.validate(async (isvalid) => {
         console.log(isvalid)
         if (!isvalid) return
-        const { data: res } = await login(this.loginForm)
-        if (status !== '200') {
-           this.$message({
-           message: res.message,
-             type: 'success',
-            showClose: true,
-             duration: 3000
-           })
-        sessionStorage.setItem('token', res.token)
-        } else {
-        this.$message({
-           message: res.message,
-             type: 'error',
-            showClose: true,
-             duration: 3000
-           })
-        }
+        const { data: res } = await register(this.loginForm)
+        if (res.status === '200') {
+        // 操作成功
+        this.$message.success({
+          message: res.message,
+          showClose: true,
+          duration: 3000
+        })
+      } else {
+        // 操作失败
+        this.$message.error({
+          message: res.message,
+          showClose: true,
+          duration: 3000
+        })
+      }
         console.log(res)
       })
     }
