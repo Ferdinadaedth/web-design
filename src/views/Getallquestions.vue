@@ -12,18 +12,30 @@
     </el-form-item>
   </el-form>
  </div>
- <div class="outer-container">
+<div class="outer-container">
   <div class="question-list">
     <div v-for="question in questions.questions" :key="question.questionid" class="question-item">
       <!-- 在这里展示每个 question -->
       <div class="question-info">
-              <p class="question-content">问题内容: {{ question.question }}</p>
+        <p class="question-content">问题内容: {{ question.question }}</p>
         <p class="question-username">发布者: {{ question.username }}</p>
+        <button @click="like(question.questionid)" class="like-button">点赞
+          <i class="el-icon-star-off"></i>
+        </button>
+        <button @click="showanswerdialog(question.questionid)" class="answer-button"> 评论
+  <i class="el-icon-chat-dot-square"></i>
+</button>
+        <button @click="redirectToLogin('answer')" class="details-button"> 查看评论
+  <i class="el-icon-chat-dot-square"></i>
+</button>
+<button @click="chatgptanswer(question.question)" class="gpt-button"> 查看chatgpt评论
+  <i class="el-icon-cpu"></i>
+</button>
       </div>
-      <el-divider id='dj'></el-divider>
-      </div>
+      <el-divider id="dj"></el-divider>
+    </div>
   </div>
-  </div>
+</div>
 </div>
   <el-dialog
     title="提出问题"
@@ -32,22 +44,52 @@
     :before-close="handleClose"
   id ="ques">
     <el-input v-model="question" placeholder="请输入问题"></el-input>
-
     <span slot="footer" class="dialog-footer">
       <el-button @click="questionDialogVisible = false">取消</el-button>
       <el-button type="primary" @click="pubquestion">确认</el-button>
     </span>
   </el-dialog>
+  <el-dialog
+    title="评论"
+    :visible.sync="answerdialogvisible"
+    width="30%"
+    :before-close="handleClose"
+  id ="ans">
+    <el-input v-model="answer" placeholder="请输入评论"></el-input>
+    <span slot="footer" class="dialog-footer">
+      <el-button @click="answerdialogvisible = false">取消</el-button>
+      <el-button type="primary" @click="Answer">确认</el-button>
+    </span>
+  </el-dialog>
+  <el-dialog
+  title="来自chatgpt的回答"
+  :visible.sync="dialogVisible"
+  width="30%"
+  :before-close="handleClose">
+    <!-- 显示 this.gptcontent -->
+    <span>{{ this.gptcontent }}</span>
+  <span slot="footer" class="dialog-footer">
+    <el-button @click="dialogVisible = false">取 消</el-button>
+    <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
+  </span>
+</el-dialog>
 </div>
 </template>
 <script>
 import { getallquestions, question } from '@/api/question'
+import { like, answer, likenumber } from '@/api/answer'
 export default {
   data() {
     return {
       questions: [], // 存储从后端获取的数据
       question: '',
-      questionDialogVisible: false
+      questionDialogVisible: false,
+      answerdialogvisible: false,
+      dialogVisible: false,
+      questionid: '',
+      currentquestionid: '',
+      answer: '',
+      gptcontent: ''
     }
   },
   created() {
@@ -62,11 +104,11 @@ export default {
    async redirectToLogin(name) {
       this.$router.push(name)
     },
-   async pubquestion() {
+    async pubquestion() {
     const postData = new URLSearchParams()// 创建一个 postform 数据对象
-  postData.append('question', this.question)
-     const { data: res } = await question(postData)
-        if (status !== '200') {
+    postData.append('question', this.question)
+    const { data: res } = await question(postData)
+        if (res.status !== '200') {
            this.$message({
            message: res.message,
              type: 'error',
@@ -80,12 +122,16 @@ export default {
             showClose: true,
              duration: 3000
            })
-           this.questionDialogVisible = false
+        getallquestions()
         }
         console.log(res)
     },
     showQuestionDialog() {
       this.questionDialogVisible = true
+    },
+    showanswerdialog(n) {
+    this.answerdialogvisible = true
+    this.currentquestionid = n
     },
     handleClose(done) {
         this.$confirm('确认关闭？')
@@ -93,8 +139,80 @@ export default {
             done()
           })
           .catch(_ => {})
+      },
+      async like(qid) {
+       const postData = new URLSearchParams()// 创建一个 postform 数据对象
+       postData.append('questionid', qid)
+        const { data: res } = await like(postData)
+        if (res.status !== '200') {
+           this.$message({
+           message: res.message,
+             type: 'error',
+            showClose: true,
+             duration: 3000
+           })
+        } else {
+        this.$message({
+           message: res.message,
+             type: 'success',
+            showClose: true,
+             duration: 3000
+           })
+        getallquestions()
+        }
+      },
+      async Answer() {
+       const postData = new URLSearchParams() // 创建一个 postform 数据对象
+       postData.append('questionid', this.currentquestionid)
+       postData.append('answer', this.answer)
+       postData.append('pid', '0')
+        const { data: res } = await answer(postData)
+        if (res.status !== 200) {
+           this.$message({
+           message: res.message,
+             type: 'error',
+            showClose: true,
+             duration: 3000
+           })
+        } else {
+        this.$message({
+           message: res.message,
+             type: 'success',
+            showClose: true,
+             duration: 3000
+           })
+        getallquestions()
+        }
+      },
+       async likenumber(qid) {
+        const postData = new URLSearchParams()
+       postData.append('questionid', qid)
+        const { data: res } = await likenumber(postData)
+        console.log(res.likes)
+        return res.likes
+      },
+      async chatgptanswer(question) {
+        this.dialogVisible = true
+         const url = 'https://api.aiproxy.io/v1/chat/completions'
+           const token = 'Bearer sk-7YXV6hBPcbWhXS0z3vGTZk3t5PvRpQ1e7XipJHqWRO9ZwUbc'
+
+          const requestData = {
+           model: 'gpt-3.5-turbo',
+            messages: [{ role: 'user', content: question }]
+          }
+         const response = await fetch(url, {
+          method: 'POST',
+            headers: {
+            Authorization: token,
+         'Content-Type': 'application/json'
+          },
+        body: JSON.stringify(requestData)
+         })
+        const responseDATA = await response.json()
+         this.gptcontent = responseDATA.choices[0].message.content
+        console.log(this.gptcontent)
       }
- }
+}
 }
 </script>
 <style>
