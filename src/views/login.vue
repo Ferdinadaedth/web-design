@@ -1,11 +1,12 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <template>
-  <div class="login_container">
-  <h1 style="color: blue;">问答社区</h1>
+<div class="login_container">
+<div id="building">
+<div id="back">
+<el-page-header @back="redirectToLogin('/')" content="登录页面" class="custom-page-header">
+</el-page-header>
+</div>
     <div class="login_box">
-      <div class="avatar_box">
-        <img src="../assets/logo.png" alt="" />
-      </div>
       <el-form
         ref="loginFormRef"
         :model="loginForm"
@@ -31,9 +32,11 @@
         <el-form-item class="btns">
           <el-button type="primary" @click="login">登录</el-button>
           <el-button @click="loginFormReset">重置</el-button>
+          <el-button @click="redirectToLogin('register')">注册</el-button>
         </el-form-item>
       </el-form>
     </div>
+  </div>
   </div>
 </template>
 <script>
@@ -76,7 +79,7 @@ export default {
         console.log(isvalid)
         if (!isvalid) return
         const { data: res } = await login(this.loginForm)
-        if (status !== '200') {
+        if (res.status === '200') {
            this.$message({
            message: res.message,
              type: 'success',
@@ -84,6 +87,7 @@ export default {
              duration: 3000
            })
         sessionStorage.setItem('token', res.token)
+        this.redirectToLogin('/')
         } else {
         this.$message({
            message: res.message,
@@ -94,13 +98,18 @@ export default {
         }
         console.log(res)
       })
+    },
+    async redirectToLogin(name) {
+      this.$router.push(name)
+      console.log('go back')
     }
+
   }
 }
 </script>
 <style lang="less" scoped>
 .login_container {
-  background-color: #2b4b6b;
+  //background-color: #2b4b6b;
   height: 100%;
 }
 .login_box {
@@ -141,5 +150,22 @@ export default {
 .btns {
   display: flex;
   justify-content: flex-end;
+}
+#building{
+background:url("../../background-ocean.jpg");
+width:100%;//大小设置为100%
+height:100%;//大小设置为100%
+position:fixed;
+background-size:100% 100%;
+}
+#back {
+  font-size: 60px; /* 调整字体大小，您可以根据需要设置其他大小值 */
+}
+.custom-page-header .el-page-header__content {
+  font-size: 30px; /* 调整返回按钮的字体大小 */
+}
+.custom-page-header .el-page-header__back-btn {
+  font-size: 30px; /* 调整返回按钮图标的大小 */
+  margin-right: 10px; /* 增加右边距，使图标与文字之间有一定的间隔 */
 }
 </style>

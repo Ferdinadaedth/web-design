@@ -5,9 +5,10 @@ export function getallquestions () {
     url: '/getallquestions'
   })
 }
-export function question () {
+export function question (data) {
   return request({
     method: 'post',
-    url: '/question'
+    url: '/question',
+    data
   })
 }

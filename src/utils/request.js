@@ -14,6 +14,7 @@ const request = axios.create({
 request.interceptors.request.use(function (config) {
   // 在发送请求之前做些什么
   config.headers.Authorization = sessionStorage.getItem('token')
+  config.headers.Authorization = `Bearer ${config.headers.Authorization}`
   config.headers['Content-Type'] = 'application/x-www-form-urlencoded'
   return config
 }, function (error) {

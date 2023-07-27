@@ -1,10 +1,12 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <template>
   <div class="login_container">
+  <div id="building">
+  <div id="back">
+<el-page-header @back="redirectToLogin('/')" content="注册页面">
+</el-page-header>
+</div>
     <div class="login_box">
-      <div class="avatar_box">
-        <img src="../assets/logo.png" alt="" />
-      </div>
       <el-form
         ref="loginFormRef"
         :model="loginForm"
@@ -42,6 +44,7 @@
       </el-form>
     </div>
   </div>
+</div>
 </template>
 <script>
 import { register } from '@/api/user'
@@ -91,6 +94,7 @@ export default {
           showClose: true,
           duration: 3000
         })
+        this.redirectToLogin('login')
       } else {
         // 操作失败
         this.$message.error({
@@ -101,6 +105,9 @@ export default {
       }
         console.log(res)
       })
+    },
+     async redirectToLogin(name) {
+      this.$router.push(name)
     }
   }
 }
@@ -148,5 +155,15 @@ export default {
 .btns {
   display: flex;
   justify-content: flex-end;
+}
+#back {
+  font-size: 50px; /* 调整字体大小，您可以根据需要设置其他大小值 */
+}
+#building{
+background:url("../../background-ocean.jpg");
+width:100%;//大小设置为100%
+height:100%;//大小设置为100%
+position:fixed;
+background-size:100% 100%;
 }
 </style>
