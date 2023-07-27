@@ -14,21 +14,21 @@
  </div>
 <div class="outer-container">
   <div class="question-list">
-    <div v-for="question in questions.questions" :key="question.questionid" class="question-item">
+    <div v-for="question in questions" :key="question.questionid" class="question-item">
       <!-- 在这里展示每个 question -->
       <div class="question-info">
         <p class="question-content">问题内容: {{ question.question }}</p>
         <p class="question-username">发布者: {{ question.username }}</p>
         <button @click="like(question.questionid)" class="like-button">点赞
-          <i class="el-icon-star-off"></i>
+        <i class="el-icon-star-off"></i>
         </button>
         <button @click="showanswerdialog(question.questionid)" class="answer-button"> 评论
   <i class="el-icon-chat-dot-square"></i>
 </button>
-        <button @click="redirectToLogin('answer')" class="details-button"> 查看评论
+        <button @click="redirectTo('answer', { questionid: question.questionid })" class="details-button"> 查看评论
   <i class="el-icon-chat-dot-square"></i>
 </button>
-<button @click="chatgptanswer(question.question)" class="gpt-button"> 查看chatgpt评论
+<button @click="chatgptanswer(question.question)" class="gpt-button"> 查看chatgpt的回答
   <i class="el-icon-cpu"></i>
 </button>
       </div>
@@ -67,17 +67,16 @@
   width="30%"
   :before-close="handleClose">
     <!-- 显示 this.gptcontent -->
-    <span>{{ this.gptcontent }}</span>
+    <span v-if="this.gptcontent !== ''">{{ this.gptcontent }}</span>
+        <span v-else>加载中...</span>
   <span slot="footer" class="dialog-footer">
-    <el-button @click="dialogVisible = false">取 消</el-button>
-    <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
   </span>
 </el-dialog>
 </div>
 </template>
 <script>
 import { getallquestions, question } from '@/api/question'
-import { like, answer, likenumber } from '@/api/answer'
+import { like, answer, likenumber, islike } from '@/api/answer'
 export default {
   data() {
     return {
@@ -98,8 +97,11 @@ export default {
   methods: {
    async getallquestions () {
         const { data: res } = await getallquestions()
-        this.questions = res
+        this.questions = res.questions.reverse()
         console.log(res)
+    },
+    async redirectTo(name, msg) {
+      this.$router.push({ name: name, params: msg })
     },
    async redirectToLogin(name) {
       this.$router.push(name)
@@ -136,6 +138,7 @@ export default {
     handleClose(done) {
         this.$confirm('确认关闭？')
           .then(_ => {
+          this.gptcontent = ''
             done()
           })
           .catch(_ => {})
@@ -158,7 +161,8 @@ export default {
             showClose: true,
              duration: 3000
            })
-        getallquestions()
+          const { data: res1 } = await islike(postData)
+          console.log(res1)
         }
       },
       async Answer() {
@@ -167,7 +171,7 @@ export default {
        postData.append('answer', this.answer)
        postData.append('pid', '0')
         const { data: res } = await answer(postData)
-        if (res.status !== 200) {
+        if (res.status !== '200') {
            this.$message({
            message: res.message,
              type: 'error',

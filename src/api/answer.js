@@ -13,6 +13,13 @@ export function like (data) {
       data
     })
   }
+  export function islike (data) {
+    return request({
+      method: 'post',
+      url: '/islike',
+      data
+    })
+  }
   export function likenumber (data) {
     return request({
       method: 'post',
@@ -20,10 +27,11 @@ export function like (data) {
       data
     })
   }
-  export function getanswer () {
+  export function getanswer (data) {
     return request({
       method: 'post',
-      url: '/getanswer'
+      url: '/getanswer',
+      data
     })
   }
   export function answeradmin() {
