@@ -40,3 +40,10 @@ export function like (data) {
         url: '/gptanswer'
       })
   }
+  export function unlike(data) {
+    return request({
+        method: 'post',
+        url: '/unlike',
+        data
+      })
+  }

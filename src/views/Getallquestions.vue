@@ -20,7 +20,7 @@
         <p class="question-content">问题内容: {{ question.question }}</p>
         <p class="question-username">发布者: {{ question.username }}</p>
         <button @click="like(question.questionid)" class="like-button">点赞
-        <i class="el-icon-star-off"></i>
+        <i class="el-icon-star-off"></i><span>{{ likenumberMap[question.questionid] }}</span>
         </button>
         <button @click="showanswerdialog(question.questionid)" class="answer-button"> 评论
   <i class="el-icon-chat-dot-square"></i>
@@ -76,7 +76,7 @@
 </template>
 <script>
 import { getallquestions, question } from '@/api/question'
-import { like, answer, likenumber, islike } from '@/api/answer'
+import { like, answer, likenumber, islike, unlike } from '@/api/answer'
 export default {
   data() {
     return {
@@ -88,7 +88,9 @@ export default {
       questionid: '',
       currentquestionid: '',
       answer: '',
-      gptcontent: ''
+      gptcontent: '',
+      likenumberMap: {},
+      islike: ''
     }
   },
   created() {
@@ -98,6 +100,10 @@ export default {
    async getallquestions () {
         const { data: res } = await getallquestions()
         this.questions = res.questions.reverse()
+        for (const question of this.questions) {
+        const likenumber = await this.likenumber(question.questionid)
+        this.$set(this.likenumberMap, question.questionid, likenumber)
+      }
         console.log(res)
     },
     async redirectTo(name, msg) {
@@ -124,7 +130,7 @@ export default {
             showClose: true,
              duration: 3000
            })
-        getallquestions()
+        this.getallquestions()
         }
         console.log(res)
     },
@@ -146,6 +152,9 @@ export default {
       async like(qid) {
        const postData = new URLSearchParams()// 创建一个 postform 数据对象
        postData.append('questionid', qid)
+       const { data: res0 } = await islike(postData)
+       console.log(res0.isLike)
+       if (res0.isLike === false || res0.isLike === 'false') {
         const { data: res } = await like(postData)
         if (res.status !== '200') {
            this.$message({
@@ -161,8 +170,28 @@ export default {
             showClose: true,
              duration: 3000
            })
-          const { data: res1 } = await islike(postData)
-          console.log(res1)
+         const likenumber = await this.likenumber(qid)
+         this.$set(this.likenumberMap, qid, likenumber)
+        }
+        } else {
+        const { data: res2 } = await unlike(postData)
+        if (res2.status !== '200') {
+           this.$message({
+           message: res2.message,
+             type: 'error',
+            showClose: true,
+             duration: 3000
+           })
+        } else {
+        this.$message({
+           message: res2.message,
+             type: 'success',
+            showClose: true,
+             duration: 3000
+           })
+          const likenumber1 = await this.likenumber(qid)
+         this.$set(this.likenumberMap, qid, likenumber1)
+        }
         }
       },
       async Answer() {
@@ -185,11 +214,11 @@ export default {
             showClose: true,
              duration: 3000
            })
-        getallquestions()
+           this.redirectTo('answer', { questionid: this.currentquestionid })
         }
       },
        async likenumber(qid) {
-        const postData = new URLSearchParams()
+       const postData = new URLSearchParams()
        postData.append('questionid', qid)
         const { data: res } = await likenumber(postData)
         console.log(res.likes)

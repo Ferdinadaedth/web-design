@@ -11,7 +11,7 @@
  </div>
 <div class="outer-container">
   <div class="question-list">
-    <div v-for="answer in answers.res" :key="answer.answerid" class="question-item">
+    <div v-for="answer in answers" :key="answer.answerid" class="question-item">
       <!-- 在这里展示每个 question -->
       <div class="question-info">
         <p class="question-content">评论内容: {{ answer.answer }}</p>
@@ -67,7 +67,7 @@ export default {
       const postData = new URLSearchParams()
        postData.append('questionid', questionId)
         const { data: res } = await getanswer(postData)
-        this.answers = res
+        this.answers = res.res.reverse()
         console.log(res)
       }
 }
