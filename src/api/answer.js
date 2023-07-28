@@ -34,6 +34,12 @@ export function like (data) {
       data
     })
   }
+  export function useranswer () {
+    return request({
+      method: 'post',
+      url: '/useranswer'
+    })
+  }
   export function answeradmin() {
     return request({
         method: 'post',

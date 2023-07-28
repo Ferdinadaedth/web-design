@@ -103,7 +103,6 @@ export default {
       this.$router.push(name)
       console.log('go back')
     }
-
   }
 }
 </script>

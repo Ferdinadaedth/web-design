@@ -12,3 +12,9 @@ export function question (data) {
     data
   })
 }
+export function userquestion () {
+  return request({
+    method: 'post',
+    url: '/userquestion'
+  })
+}

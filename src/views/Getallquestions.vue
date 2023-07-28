@@ -6,6 +6,9 @@
  <h1 class="title">问答社区 | Ferdinand</h1>
   <el-form>
     <el-form-item class="btns">
+    <el-button type="primary" @click="redirectTouser('user')">
+    <i class="el-icon-user-solid"></i>用户
+    </el-button>
     <el-button type="primary" @click="showQuestionDialog">发起问题</el-button>
       <el-button type="primary" @click="redirectToLogin('login')">登录</el-button>
       <el-button @click="redirectToLogin('register')">注册</el-button>
@@ -68,7 +71,7 @@
   :before-close="handleClose">
     <!-- 显示 this.gptcontent -->
     <span v-if="this.gptcontent !== ''">{{ this.gptcontent }}</span>
-        <span v-else>加载中...</span>
+        <i v-else class="el-icon-loading"></i>
   <span slot="footer" class="dialog-footer">
   </span>
 </el-dialog>
@@ -77,6 +80,7 @@
 <script>
 import { getallquestions, question } from '@/api/question'
 import { like, answer, likenumber, islike, unlike } from '@/api/answer'
+import { user } from '@/api/user'
 export default {
   data() {
     return {
@@ -111,6 +115,19 @@ export default {
     },
    async redirectToLogin(name) {
       this.$router.push(name)
+    },
+    async redirectTouser(name) {
+   const { data: res } = await user()
+        if (res.status != '200') {
+           this.$message({
+           message: res.message,
+             type: 'error',
+            showClose: true,
+             duration: 3000
+           })
+        } else {
+              this.$router.push(name)
+        }
     },
     async pubquestion() {
     const postData = new URLSearchParams()// 创建一个 postform 数据对象
