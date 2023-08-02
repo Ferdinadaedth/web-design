@@ -121,15 +121,23 @@ export default {
     }
   },
   created() {
-    this.getallquestions()
+this.initData()
   },
   methods: {
-      async filterQuestions() {
+  async initData() {
+    await this.getallquestions() // 等待获取所有问题
+    this.filterQuestions() // 等待数据加载后再执行过滤
+  },
+    async filterQuestions() {
       // 过滤问题列表，只显示匹配搜索词的问题
+            if (this.searchTerm == '') {
+      this.filteredQuestions = this.questions
+      } else {
       const filteredQuestions = this.questions.filter((question) =>
         question.question.includes(this.searchTerm)
       )
       this.filteredQuestions = filteredQuestions
+}
     },
    async getallquestions () {
         const { data: res } = await getallquestions()
@@ -138,8 +146,7 @@ export default {
         const likenumber = await this.likenumber(question.questionid)
         this.$set(this.likenumberMap, question.questionid, likenumber)
       }
-      this.filterQuestions()
-        console.log(res)
+      console.log(res)
     },
     async redirectTo(name, msg) {
       this.$router.push({ name: name, params: msg })
