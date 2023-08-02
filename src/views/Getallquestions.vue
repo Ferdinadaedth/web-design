@@ -16,8 +16,11 @@
   </el-form>
  </div>
 <div class="outer-container">
+<div class="search-bar">
+      <input v-model="searchTerm" @input="filterQuestions" placeholder="搜索问题内容">
+    </div>
   <div class="question-list">
-    <div v-for="question in questions" :key="question.questionid" class="question-item">
+    <div v-for="question in filteredQuestions" :key="question.questionid" class="question-item">
       <!-- 在这里展示每个 question -->
       <div class="question-info">
         <p class="question-content">问题内容: {{ question.question }}</p>
@@ -27,6 +30,9 @@
         </button>
         <button @click="showanswerdialog(question.questionid)" class="answer-button"> 评论
   <i class="el-icon-chat-dot-square"></i>
+</button>
+        <button @click="showmessageDialog(question.username)" class="message"> 私信
+  <i class="el-icon-message"></i>
 </button>
         <button @click="redirectTo('answer', { questionid: question.questionid })" class="details-button"> 查看评论
   <i class="el-icon-chat-dot-square"></i>
@@ -40,6 +46,18 @@
   </div>
 </div>
 </div>
+<el-dialog
+    title="发送私信"
+    :visible.sync="messageDialogVisible"
+    width="30%"
+    :before-close="handleClose"
+  id ="ques">
+    <el-input v-model="content" placeholder="请输入私信内容"></el-input>
+    <span slot="footer" class="dialog-footer">
+      <el-button @click="messageDialogVisible = false">取消</el-button>
+      <el-button type="primary" @click="message">确认</el-button>
+    </span>
+  </el-dialog>
   <el-dialog
     title="提出问题"
     :visible.sync="questionDialogVisible"
@@ -80,7 +98,7 @@
 <script>
 import { getallquestions, question } from '@/api/question'
 import { like, answer, likenumber, islike, unlike } from '@/api/answer'
-import { user } from '@/api/user'
+import { user, message } from '@/api/user'
 export default {
   data() {
     return {
@@ -88,19 +106,31 @@ export default {
       question: '',
       questionDialogVisible: false,
       answerdialogvisible: false,
+      messageDialogVisible: false,
       dialogVisible: false,
       questionid: '',
       currentquestionid: '',
       answer: '',
       gptcontent: '',
       likenumberMap: {},
-      islike: ''
+      islike: '',
+      nowusername: '',
+      content: '',
+       searchTerm: '',
+       filteredQuestions: []
     }
   },
   created() {
     this.getallquestions()
   },
   methods: {
+      async filterQuestions() {
+      // 过滤问题列表，只显示匹配搜索词的问题
+      const filteredQuestions = this.questions.filter((question) =>
+        question.question.includes(this.searchTerm)
+      )
+      this.filteredQuestions = filteredQuestions
+    },
    async getallquestions () {
         const { data: res } = await getallquestions()
         this.questions = res.questions.reverse()
@@ -108,6 +138,7 @@ export default {
         const likenumber = await this.likenumber(question.questionid)
         this.$set(this.likenumberMap, question.questionid, likenumber)
       }
+      this.filterQuestions()
         console.log(res)
     },
     async redirectTo(name, msg) {
@@ -153,6 +184,10 @@ export default {
     },
     showQuestionDialog() {
       this.questionDialogVisible = true
+    },
+    showmessageDialog(name) {
+      this.messageDialogVisible = true
+      this.nowusername = name
     },
     showanswerdialog(n) {
     this.answerdialogvisible = true
@@ -232,6 +267,27 @@ export default {
              duration: 3000
            })
            this.redirectTo('answer', { questionid: this.currentquestionid })
+        }
+      },
+      async message() {
+      const postData = new URLSearchParams() // 创建一个 postform 数据对象
+       postData.append('receiver', this.nowusername)
+       postData.append('message', this.content)
+        const { data: res } = await message(postData)
+        if (res.status !== '200') {
+           this.$message({
+           message: res.message,
+             type: 'error',
+            showClose: true,
+             duration: 3000
+           })
+        } else {
+        this.$message({
+           message: res.message,
+             type: 'success',
+            showClose: true,
+             duration: 3000
+           })
         }
       },
        async likenumber(qid) {

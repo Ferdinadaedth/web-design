@@ -1,7 +1,7 @@
 import axios from 'axios'
 const request = axios.create({
-  // baseURL: 'http://127.0.0.1:8088',
-   baseURL: 'http://43.138.59.103:100',
+   baseURL: 'http://127.0.0.1:8088',
+  // baseURL: 'http://43.138.59.103:100',
   //   baseURL: 'http://ten.ferdinandaedth.top:100',
   // `transformResponse` 在传递给 then/catch 前，允许修改响应数据
   transformResponse: [function (data) {

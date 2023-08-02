@@ -47,3 +47,36 @@ export function register (data) {
       data
     })
   }
+  export function message (data) {
+    return request({
+      method: 'post',
+      url: '/message',
+      data
+    })
+  }
+  export function getmessage () {
+    return request({
+      method: 'post',
+      url: '/getmessage'
+    })
+  }
+  export function getsendingmessage () {
+    return request({
+      method: 'post',
+      url: '/getsendingmessage'
+    })
+  }
+  export function modifym (data) {
+    return request({
+      method: 'post',
+      url: '/modifym',
+      data
+    })
+  }
+  export function deletem (data) {
+    return request({
+      method: 'post',
+      url: '/deletem',
+      data
+    })
+  }

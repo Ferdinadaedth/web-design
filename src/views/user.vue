@@ -9,8 +9,9 @@
     <el-descriptions title="用户信息" id = "usertitle">
     <el-descriptions-item label="用户名">{{ this.username }}</el-descriptions-item>
 </el-descriptions>
+<el-button @click="redirectToLogin('message')">我的私信</el-button>
 </div>
-<h1 class="list-title">我的评论</h1>
+<h2 class="list-title">我的评论</h2>
 <el-divider id="dj"></el-divider>
   <div class="question-list1">
   <div v-if="notnull1">
@@ -33,9 +34,8 @@
     <el-empty description="空空如也"></el-empty>
    </div>
 </div>
-<h1 class="list-title">我的问题</h1>
-<el-divider id="dj"></el-divider>
-<div class="question-list2">
+<h2 class="list-title">我的问题</h2>
+<div class="userquestion-list">
 <div v-if="notnull2">
     <div v-for="question in questions" :key="question.questionid" class="question-item">
       <!-- 在这里展示每个 question -->
@@ -184,7 +184,7 @@ export default {
       if (res.res == null || res.res == 'null') {
            this.notnull2 = false
         } else {
-        this.answers = res.res.reverse()
+        this.questions = res.res.reverse()
         console.log(this.answer)
         console.log(res)
         }
@@ -296,7 +296,7 @@ justify-content: centor;
   background-color: #F5F5F5;
   opacity: 0.8;
 }
-.question-list2{
+.userquestion-list{
   height: 250px; /* 调整为您希望的容器高度 */
   overflow-y: auto;
   background-color: #F5F5F5;
