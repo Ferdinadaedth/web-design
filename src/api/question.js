@@ -18,3 +18,10 @@ export function userquestion () {
     url: '/userquestion'
   })
 }
+export function getquestion (data) {
+  return request({
+    method: 'post',
+    url: '/getquestion',
+    data
+  })
+}

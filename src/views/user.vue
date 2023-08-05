@@ -20,6 +20,7 @@
       <div class="question-info">
         <p class="question-content">评论内容: {{ answer.answer }}</p>
         <p class="question-username">发布者: {{ answer.username }}</p>
+         <p class="question-question">问题内容: {{ answerQuestionMap[answer.questionid] }}</p>
         <button @click="showanswerDialog(answer.answerid)">
         <i class="el-icon-edit"></i>编辑
         </button>
@@ -108,7 +109,7 @@
 </template>
 <script>
 import { useranswer } from '@/api/answer'
-import { userquestion } from '@/api/question'
+import { userquestion, getquestion } from '@/api/question'
 import { user, modifya, deletea, modifyq, deleteq } from '@/api/user'
 export default {
   data() {
@@ -126,7 +127,8 @@ export default {
       alertdialogvisible: false,
       alertdialogvisible2: false,
       notnull1: true,
-      notnull2: true
+      notnull2: true,
+      answerQuestionMap: {}
     }
   },
   created() {
@@ -175,8 +177,13 @@ export default {
            this.notnull1 = false
         } else {
         this.answers = res.res.reverse()
-        console.log(this.answer)
-        console.log(res)
+        for (const answer of this.answers) {
+        const postData = new URLSearchParams() // 创建一个 postform 数据对象
+       postData.append('questionid', answer.questionid)
+      const { data: res1 } = await getquestion(postData)
+      this.$set(this.answerQuestionMap, answer.questionid, res1.question[0].question)
+      console.log(res1.question[0].question)
+    }
         }
       },
       async Getuserquestion() {

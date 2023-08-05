@@ -17,7 +17,8 @@
  </div>
 <div class="outer-container">
 <div class="search-bar">
-      <input v-model="searchTerm" @input="filterQuestions" placeholder="搜索问题内容">
+     <input type="text" v-model="searchQuery" placeholder="搜索发布者或问题">
+          <button @click="search">搜索</button>
     </div>
   <div class="question-list">
     <div v-for="question in filteredQuestions" :key="question.questionid" class="question-item">
@@ -121,27 +122,25 @@ export default {
     }
   },
   created() {
-this.initData()
+    this.getallquestions() // 等待获取所有问题
   },
   methods: {
-  async initData() {
-    await this.getallquestions() // 等待获取所有问题
-    this.filterQuestions() // 等待数据加载后再执行过滤
-  },
-    async filterQuestions() {
-      // 过滤问题列表，只显示匹配搜索词的问题
-            if (this.searchTerm == '') {
-      this.filteredQuestions = this.questions
-      } else {
-      const filteredQuestions = this.questions.filter((question) =>
-        question.question.includes(this.searchTerm)
+      search() {
+     const filteredQuestions = this.questions.filter(question => {
+      // 根据问题内容和发布者名字来匹配搜索关键词
+      return (
+        question.question.includes(this.searchQuery) ||
+        question.username.includes(this.searchQuery)
       )
-      this.filteredQuestions = filteredQuestions
-}
-    },
+    })
+
+    // 更新过滤后的问题列表
+    this.filteredQuestions = filteredQuestions
+  },
    async getallquestions () {
         const { data: res } = await getallquestions()
         this.questions = res.questions.reverse()
+        this.filteredQuestions = this.questions
         for (const question of this.questions) {
         const likenumber = await this.likenumber(question.questionid)
         this.$set(this.likenumberMap, question.questionid, likenumber)
