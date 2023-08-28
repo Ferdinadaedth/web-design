@@ -21,6 +21,7 @@
           <button @click="search">搜索</button>
     </div>
   <div class="question-list">
+  <div v-if="notnull">
     <div v-for="question in filteredQuestions" :key="question.questionid" class="question-item">
       <!-- 在这里展示每个 question -->
       <div class="question-info">
@@ -43,6 +44,10 @@
 </button>
       </div>
       <el-divider id="dj"></el-divider>
+    </div>
+    </div>
+    <div v-else>
+    <el-empty description="空空如也"></el-empty>
     </div>
   </div>
 </div>
@@ -118,7 +123,8 @@ export default {
       nowusername: '',
       content: '',
        searchTerm: '',
-       filteredQuestions: []
+       filteredQuestions: [],
+       notnull: true
     }
   },
   created() {
@@ -139,11 +145,15 @@ export default {
   },
    async getallquestions () {
         const { data: res } = await getallquestions()
-        this.questions = res.questions.reverse()
-        this.filteredQuestions = this.questions
+        this.questions = res.questions
+        if (res.res == null || res.res == 'null') {
+           this.notnull = false
+        } else {
+        this.filteredQuestions = this.questions.reverse
         for (const question of this.questions) {
         const likenumber = await this.likenumber(question.questionid)
         this.$set(this.likenumberMap, question.questionid, likenumber)
+        }
       }
       console.log(res)
     },
